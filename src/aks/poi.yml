@@ -1,0 +1,57 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tripinsights-poi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tripinsights-poi
+  template:
+    metadata:
+      labels:
+        app: tripinsights-poi
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: tripinsights-poi
+        image: registrynbu1374.azurecr.io/challenge1:latest
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: ConnectionStrings__myDrivingDB
+          valueFrom:
+            secretKeyRef:
+              name: dev-db-secret
+              key: sql
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      volumes:
+      - name: foo
+        secret:
+            secretName: dev-db-secret
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripinsights-poi
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: tripinsights-poi

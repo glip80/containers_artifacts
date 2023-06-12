@@ -1,0 +1,49 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tripinsights-tripviewer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tripinsights-tripviewer
+  template:
+    metadata:
+      labels:
+        app: tripinsights-tripviewer
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: tripinsights-tripviewer
+        image: registrynbu1374.azurecr.io/tripinsights/tripviewer.api:1.0
+        env:
+        - name: USERPROFILE_API_ENDPOINT
+          value: "http://tripinsights-userprofile"
+        - name: TRIPS_API_ENDPOINT
+          value: "http://tripinsights-trips"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripinsights-tripviewer
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: tripinsights-tripviewer

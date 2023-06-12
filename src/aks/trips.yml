@@ -1,0 +1,62 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tripinsights-trips
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tripinsights-trips
+  template:
+    metadata:
+      labels:
+        app: tripinsights-trips
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: tripinsights-trips
+        image: registrynbu1374.azurecr.io/tripinsights/trips.api:1.0
+        env:
+        - name: SQL_SERVER
+          value: "sqlservernbu1374.database.windows.net"    
+        - name: SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: dev-trips-secret
+              key: sql_user
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dev-trips-secret
+              key: sql_password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      volumes:
+      - name: foo
+        secret:
+            secretName: dev-trips-secret
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripinsights-trips
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: tripinsights-trips

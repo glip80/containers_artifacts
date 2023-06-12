@@ -40,6 +40,7 @@ namespace poi
                 });
 
             var connectionString = poi.Utility.POIConfiguration.GetConnectionString(this.Configuration);
+            Console.WriteLine($"connectionString:{connectionString}");
             services.AddDbContext<POIContext>(options =>
                 options.UseSqlServer(connectionString));
 

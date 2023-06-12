@@ -1,0 +1,57 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tripinsights-userprofile
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tripinsights-userprofile
+  template:
+    metadata:
+      labels:
+        app: tripinsights-userprofile
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: tripinsights-userprofile
+        image: registrynbu1374.azurecr.io/tripinsights/userprofile:1.0
+        env:
+        - name: ENV
+          value: "Production"
+        - name: ConnectionStrings__myDrivingDB
+          valueFrom:
+            secretKeyRef:
+              name: dev-db-secret
+              key: sql
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+      volumes:
+      - name: foo
+        secret:
+            secretName: dev-db-secret
+            optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripinsights-userprofile
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: tripinsights-userprofile

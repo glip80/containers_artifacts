@@ -1,0 +1,64 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tripinsights-user-java
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tripinsights-user-java
+  template:
+    metadata:
+      labels:
+        app: tripinsights-user-java
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: tripinsights-user-java
+        image: registrynbu1374.azurecr.io/tripinsights/user-java:1.0
+        env:
+        - name: SQL_SERVER
+          value: "sqlservernbu1374.database.windows.net"
+        - name: SQL_DB_NAME
+          value: "mydrivingDB"
+        - name: SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: dev-trips-secret
+              key: sql_user
+        - name: SQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dev-trips-secret
+              key: sql_password
+        - name: ConnectionStrings__myDrivingDB
+          valueFrom:
+            secretKeyRef:
+              name: dev-db-secret
+              key: sql
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tripinsights-user-java
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: tripinsights-user-java
