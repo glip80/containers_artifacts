@@ -1,0 +1,13 @@
+﻿kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-user-full-access
+  namespace: api-dev
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: api-user-full-access
+subjects:
+- kind: User
+  namespace: api-dev
+  name: api-dev@msftopenhack6754ops.onmicrosoft.com

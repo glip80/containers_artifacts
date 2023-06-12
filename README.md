@@ -89,3 +89,18 @@ docker run -e SQLFQDN=sqlservernbu1374.database.windows.net -e SQLUSER=sqladminn
 
 
 kubectl create secret generic dev-trips-secret --from-literal=sql_password='myPassword123!' --from-literal sql_user='sqladminnBu1374'
+
+#3
+
+kubectl create namespace web-dev
+kubectl create namespace api-dev
+
+kubectl create secret generic dev-trips-secret --from-literal=sql_password='myPassword123!' --from-literal sql_user='sqladminnBu1374' -n api-dev
+
+kubectl apply -f .\src\aks\poi.yml -n api-dev
+kubectl apply -f .\src\aks\trips.yml -n api-dev
+kubectl apply -f .\src\aks\user-java.yml -n api-dev
+kubectl apply -f .\src\aks\userprofile.yml -n api-dev
+kubectl apply -f .\src\aks\tripviewer.yml -n web-dev
+
+kubectl exec --stdin --tty tripinsights-tripviewer-9fb54485d-66kzp -n web-dev -- /bin/sh

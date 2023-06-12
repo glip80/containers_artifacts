@@ -18,13 +18,20 @@ spec:
       - name: tripinsights-userprofile
         image: registrynbu1374.azurecr.io/tripinsights/userprofile:1.0
         env:
-        - name: ENV
-          value: "Production"
-        - name: ConnectionStrings__myDrivingDB
+        - name:  SQL_SERVER
+          value: sqlservernbu1374.database.windows.net
+        - name:  SQL_DBNAME
+          value: mydrivingDB
+        - name: SQL_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: dev-db-secret
-              key: sql
+              name: dev-trips-secret
+              key: sql_password
+        - name: SQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: dev-trips-secret
+              key: sql_user
         resources:
           requests:
             cpu: 100m
@@ -35,19 +42,14 @@ spec:
         ports:
         - containerPort: 80
           name: http
-          protocol: TCP
-      volumes:
-      - name: foo
-        secret:
-            secretName: dev-db-secret
-            optional: true
+          protocol: TCP      
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: tripinsights-userprofile
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - port: 80
     targetPort: http

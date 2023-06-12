@@ -18,10 +18,12 @@ spec:
       - name: tripinsights-tripviewer
         image: registrynbu1374.azurecr.io/tripinsights/tripviewer.api:1.0
         env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
         - name: USERPROFILE_API_ENDPOINT
-          value: "http://tripinsights-userprofile"
+          value: "http://tripinsights-userprofile.api-dev.svc.cluster.local"
         - name: TRIPS_API_ENDPOINT
-          value: "http://tripinsights-trips"
+          value: "http://tripinsights-trips.api-dev.svc.cluster.local"
         resources:
           requests:
             cpu: 100m

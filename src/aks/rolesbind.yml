@@ -1,0 +1,28 @@
+﻿kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: api-user-full-access
+  namespace: api-dev
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: api-user-full-access
+subjects:
+- kind: Group
+  namespace: api-dev
+  name: a93f5f7f-3e47-4b6e-9778-c4e0a15787da
+
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: web-user-full-access
+  namespace: web-dev
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: web-user-full-access
+subjects:
+- kind: Group
+  namespace: web-dev
+  name: 60f44bbf-2b08-4870-9b7f-e9fd9d0853e6
