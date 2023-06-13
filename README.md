@@ -104,3 +104,32 @@ kubectl apply -f .\src\aks\userprofile.yml -n api-dev
 kubectl apply -f .\src\aks\tripviewer.yml -n web-dev
 
 kubectl exec --stdin --tty tripinsights-tripviewer-9fb54485d-66kzp -n web-dev -- /bin/sh
+
+sed -i 's/<subscription-id>/420573c6-de7a-4585-b9ce-34dd795a83ac/g' kv-flexvol-installer.yaml
+sed -i 's/<keyvault-name>/challenge4keyvault/g' kv-flexvol-installer.yaml
+
+
+export RESOURCE_GROUP='teamResources'
+export UAMI='challenge4UAMI'
+export KEYVAULT_NAME=challenge4Keyvault
+export CLUSTER_NAME=Challenge3
+
+
+# az keyvault create --location eastasia --name $KEYVAULT_NAME --resource-group $RESOURCE_GROUP
+# az identity create --name $UAMI --resource-group $RESOURCE_GROUP
+export USER_ASSIGNED_CLIENT_ID="$(az identity show -g $RESOURCE_GROUP --name $UAMI --query 'clientId' -o tsv)"
+export IDENTITY_TENANT=$(az aks show --name $CLUSTER_NAME --resource-group $RESOURCE_GROUP --query identity.tenantId -o tsv)
+
+# az keyvault set-policy -n $KEYVAULT_NAME --key-permissions get --spn $USER_ASSIGNED_CLIENT_ID
+# az keyvault set-policy -n $KEYVAULT_NAME --secret-permissions get --spn $USER_ASSIGNED_CLIENT_ID
+# az keyvault set-policy -n $KEYVAULT_NAME --certificate-permissions get --spn $USER_ASSIGNED_CLIENT_ID
+
+# az keyvault secret set --name sqluser --vault-name $KEYVAULT_NAME --value sqladminnBu1374
+# az keyvault secret set --name sqlpassword --vault-name $KEYVAULT_NAME --value myPassword123!
+export AKS_OIDC_ISSUER="$(az aks show --resource-group $RESOURCE_GROUP --name $CLUSTER_NAME --query "oidcIssuerProfile.issuerUrl" -o tsv)"
+export SERVICE_ACCOUNT_NAME="workload-identity-sa"  # sample name; can be changed
+export SERVICE_ACCOUNT_NAMESPACE="api-dev" # can be changed to namespace of your workload
+
+
+export FEDERATED_IDENTITY_NAME="aksfederatedidentity" # can be changed as needed
+az identity federated-credential create --name $FEDERATED_IDENTITY_NAME --identity-name $UAMI --resource-group $RESOURCE_GROUP --issuer ${AKS_OIDC_ISSUER} --subject system:serviceaccount:${SERVICE_ACCOUNT_NAMESPACE}:${SERVICE_ACCOUNT_NAME}

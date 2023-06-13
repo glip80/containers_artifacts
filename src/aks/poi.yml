@@ -17,14 +17,15 @@ spec:
       containers:
       - name: tripinsights-poi
         image: registrynbu1374.azurecr.io/challenge1:latest
+        volumeMounts:
+        - name: secrets-volume
+          mountPath: "/mnt/secrets"
+          readOnly: true
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
-        - name: ConnectionStrings__myDrivingDB
-          valueFrom:
-            secretKeyRef:
-              name: dev-db-secret
-              key: sql
+        - name: CONFIG_FILES_PATH
+          value: "/mnt/secrets"
         resources:
           requests:
             cpu: 100m
@@ -37,10 +38,12 @@ spec:
           name: http
           protocol: TCP
       volumes:
-      - name: foo
-        secret:
-            secretName: dev-db-secret
-            optional: true
+      - name: secrets-volume
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "azure-kvname-system-msi"          
 ---
 apiVersion: v1
 kind: Service
