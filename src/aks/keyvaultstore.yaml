@@ -1,0 +1,24 @@
+# This is a SecretProviderClass example using workload identity to access your key vault
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: azure-kvname-workload-identity # needs to be unique per namespace
+spec:
+  provider: azure
+  parameters:
+    usePodIdentity: "false"
+    useVMManagedIdentity: "false"          
+    clientID: "91d9fadd-ee93-459a-97db-0e43af06de1f" # Setting this to use workload identity
+    keyvaultName: "challenge4Keyvault"       # Set to the name of your key vault
+    cloudName: ""                         # [OPTIONAL for Azure] if not provided, the Azure environment defaults to AzurePublicCloud
+    objects:  |
+      array:
+        - |
+          objectName: sqluser
+          objectType: secret              # object types: secret, key, or cert
+          objectVersion: ""               # [OPTIONAL] object versions, default to latest if empty
+        - |
+          objectName: sqlpassword
+          objectType: secret
+          objectVersion: ""
+    tenantId: "88443654-3c6a-41a1-90f1-632b138878e4"        # The tenant ID of the key vault
