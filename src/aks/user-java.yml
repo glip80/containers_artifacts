@@ -2,6 +2,8 @@
 kind: Deployment
 metadata:
   name: tripinsights-user-java
+  labels:
+    azure.workload.identity/use: true
 spec:
   replicas: 1
   selector:
@@ -14,6 +16,7 @@ spec:
     spec:
       nodeSelector:
         "kubernetes.io/os": linux
+      serviceAccountName: "workload-identity-sa"
       containers:
       - name: tripinsights-user-java
         image: registrynbu1374.azurecr.io/tripinsights/user-java:1.0
