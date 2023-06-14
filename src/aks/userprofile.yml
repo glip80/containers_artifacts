@@ -2,8 +2,6 @@
 kind: Deployment
 metadata:
   name: tripinsights-userprofile
-  labels:
-    azure.workload.identity/use: true
 spec:
   replicas: 1
   selector:
@@ -20,21 +18,10 @@ spec:
       containers:
       - name: tripinsights-userprofile
         image: registrynbu1374.azurecr.io/tripinsights/userprofile:1.0
-        env:
-        - name:  SQL_SERVER
-          value: sqlservernbu1374.database.windows.net
-        - name:  SQL_DBNAME
-          value: mydrivingDB
-        - name: SQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: dev-trips-secret
-              key: sql_password
-        - name: SQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: dev-trips-secret
-              key: sql_user
+        volumeMounts:
+        - name: secrets-volume
+          mountPath: "/secrets"
+          readOnly: true 
         resources:
           requests:
             cpu: 100m
@@ -45,7 +32,14 @@ spec:
         ports:
         - containerPort: 80
           name: http
-          protocol: TCP      
+          protocol: TCP     
+      volumes:
+      - name: secrets-volume
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "azure-kvname-system-msi"            
 ---
 apiVersion: v1
 kind: Service

@@ -5,8 +5,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: api-dev.challenge4.com  # Replace with your domain or IP address
-    http:
+  - http:
       paths:
       - path: /api/poi
         pathType: Prefix
@@ -15,6 +14,20 @@ spec:
             name: tripinsights-poi
             port:
               number: 80
+      - path: /swagger/docs/poi
+        pathType: Prefix
+        backend:
+          service:
+            name: tripinsights-poi
+            port:
+              number: 80                
+      - path: /metrics
+        pathType: Prefix
+        backend:
+          service:
+            name: tripinsights-poi
+            port:
+              number: 80              
       - path: /api/trips
         pathType: Prefix
         backend:

@@ -1,16 +1,16 @@
 ﻿apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: web-ingress
+  name: monitor-ingress
 spec:
   ingressClassName: nginx
   rules:
   - http:
       paths:
-      - path: /
+      - path: /monitor/*
         pathType: Prefix
         backend:
           service:
-            name: tripinsights-tripviewer
+            name: grafana-1686647737
             port:
-              number: 80
+              number: 3000
